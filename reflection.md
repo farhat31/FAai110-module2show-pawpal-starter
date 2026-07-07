@@ -7,6 +7,34 @@
 - Briefly describe your initial UML design.
 - What classes did you include, and what responsibilities did you assign to each?
 
+- Pet Class 
+    Attributes: 
+    - Name, type, age, breed, needs, vet, insurance 
+
+    Methods: 
+    - Insert pet information, edit information 
+
+- Owner Class 
+    Attributes: 
+    - Name, num of pets, availability, preferences
+
+    Methods: 
+    - Add/Remove pets, add/change availibilty, add preferences
+
+- Tasks Class
+    Attributes: 
+    - Pet, description of task, priority, frequency, status 
+
+    Methods: 
+    - Add/Remove task, change status, assign task  
+
+- Schedule Class 
+    Attributes: 
+    - Days of the week, time blocked 
+
+    Methods: 
+    - add availibilty, add times, add tasks
+
 **b. Design changes**
 
 - Did your design change during implementation?
