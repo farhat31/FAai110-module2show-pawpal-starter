@@ -72,11 +72,14 @@ One tradeoff the scheduker makes is that it round-robins tasks per pet rather th
 
 - How did you use AI tools during this project (for example: design brainstorming, debugging, refactoring)?
 - What kinds of prompts or questions were most helpful?
+I used AI for helping me come up with code as well as debugging and refactoring. It was very helpful in making suggestions on where I lacked and what needed to be modified. Prompts with a lot of depth or specific prompts were very helpful. 
 
 **b. Judgment and verification**
 
 - Describe one moment where you did not accept an AI suggestion as-is.
 - How did you evaluate or verify what the AI suggested?
+
+For some of my methods AI wanted to really overcomplicate things. I did not think it was neccesary in this case scenario so I avoided those suggestions. 
 
 ---
 

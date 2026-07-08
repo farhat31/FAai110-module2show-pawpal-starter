@@ -73,9 +73,22 @@ pytest --cov
 
 Sample test output:
 
-```
-# Paste your pytest output here
-```
+python -m pytest
+My test includes checking sorting, recurrence of tasks, finding conflicts and more. 
+
+## Paste your pytest output here
+
+<!-- ============================= test session starts ==============================
+platform darwin -- Python 3.9.12, pytest-7.1.1, pluggy-1.0.0
+rootdir: /Users/farhatahamed/Documents/CodePathAI110/FAai110-module2show-pawpal-starter
+plugins: anyio-3.5.0
+collected 8 items                                                              
+
+tests/test_pawpal.py ........                                            [100%]
+
+============================== 8 passed in 0.01s ===============================
+``` -->
+4/5 confidence level
 
 ## 📐 Smarter Scheduling
 
