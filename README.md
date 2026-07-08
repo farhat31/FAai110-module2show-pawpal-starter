@@ -88,18 +88,19 @@ tests/test_pawpal.py ........                                            [100%]
 
 ============================== 8 passed in 0.01s ===============================
 ``` -->
-4/5 confidence level
+
+## ✨ Features
+
+- **Sorting by time** — `Scheduler.sort_tasks_by_time()` orders tasks chronologically by `scheduled_time` ("HH:MM"), pushing untimed tasks to the end.
+- **Sorting by urgency** — `Scheduler.sort_tasks()` ranks tasks by a computed `priority_score()`: priority tier (high/medium/low), aged up the longer a task sits overdue, and boosted further if it matches one of the owner's preferences.
+- **Filtering** — `Scheduler.filter_tasks(pet, status)` narrows tasks by pet (instance or name) and status (`all` / `incomplete` / `complete`); `Scheduler.get_pending_tasks()` further restricts to tasks that are actually due today.
+- **Conflict warnings** — `Task.overlaps()` / `Task.time_range()` detect overlapping time windows (even across different pets); `Scheduler.find_conflicts()` returns the clashing pairs and `Scheduler.get_conflict_warnings()` turns them into printable warning strings.
+- **Daily recurrence** — `Task.mark_complete()` marks a task done and, based on its `frequency` (`daily`/`weekly`), calls `Task.spawn_next_occurrence()` to create the next instance due one interval later.
+- **Fair daily planning** — `Scheduler.build_daily_plan()` round-robins across every pet's urgency-sorted queue so one pet's high-priority tasks can't crowd out another's; splittable tasks can be trimmed down to `min_duration_minutes` to use up leftover time.
+- **Optimal daily planning** — `Scheduler.build_optimal_plan()` runs a 0/1 knapsack over all pending tasks to maximize total priority-weighted value packed into the available minutes.
+- **Plan explanations** — `Scheduler.explain_plan()` produces a human-readable reason string per scheduled task, flagging any that still overlap another.
 
 ## 📐 Smarter Scheduling
-
-> Fill in once you've implemented scheduling logic.
-
-| Feature | Method(s) | Notes |
-|---------|-----------|-------|
-| Task sorting | | e.g., by priority, duration |
-| Filtering | | e.g., skip tasks if time runs out |
-| Conflict handling | | e.g., overlapping time slots |
-| Recurring tasks | | e.g., daily vs. weekly |
 
 | Task sorting | Scheduler.sort_tasks(), Scheduler.sort_tasks_by_time() | e.g., by priority, duration |
 | Filtering | Scheduler.filter_tasks(pet, status), Scheduler.get_pending_tasks(pet, today) | e.g., skip tasks if time runs out |
@@ -107,14 +108,74 @@ tests/test_pawpal.py ........                                            [100%]
 | Recurring tasks | Task.mark_complete(), Task.spawn_next_occurrence(), Task.frequency/due_date | e.g., daily vs. weekly |
 | Fair daily planning | Scheduler.build_daily_plan()| Round-robins across pets by urgency so one pet's high-priority tasks can't crowd out another's|
 | Optimal daily planning | Scheduler.build_optimal_plan() | maximizes total priority-weighted value packed into the available minutes| 
+
 ## 📸 Demo Walkthrough
 
-Describe your app in numbered steps so a reader can follow along without watching a video:
+### UI features
 
-1. <!-- Describe this step -->
-2. <!-- Describe this step -->
-3. <!-- Describe this step -->
-4. <!-- Describe this step -->
-5. <!-- Add more steps as needed -->
+The Streamlit app (`app.py`) lets a user:
+
+- Enter an **owner name**, **pet name**, and **species**.
+- **Add tasks** to that pet with a description, duration (minutes), priority (low/medium/high), recurrence (once/daily/weekly), and an optional scheduled time.
+- **Filter** the task list by status (all / incomplete / complete).
+- **Sort** the task list by time or by urgency, with each task's computed urgency score shown alongside it.
+- See **conflict warnings** highlighted automatically whenever two scheduled tasks overlap (or a success message when there are none).
+- Set the **available minutes** for the day and choose between two scheduling strategies — a fair round-robin plan across pets, or an optimal (priority-value-maximizing) plan — then **generate a schedule**.
+- View the generated schedule as a table, expand a "Why this plan?" section for the reasoning behind each task's placement, and see any conflicts still present in the final plan.
+
+### Example workflow
+
+1. Enter owner "Jordan" and add a pet, "Mochi" (dog).
+2. Add a task: "Morning walk", 20 min, high priority, recurs daily, scheduled at 08:00.
+3. Add a second task: "Vet checkup", 30 min, high priority, scheduled at 08:00 — the app immediately flags this as a **conflict** with the morning walk.
+4. Switch "Sort by" to `urgency` to see which task the scheduler considers more pressing.
+5. Set "Available minutes today" to 60 and click **Generate schedule** to see the fair daily plan, its total planned time, and the reasoning behind each pick.
+6. Mark the walk complete (via the backend); because it recurs daily, a new occurrence is automatically spawned for tomorrow.
+
+### Key Scheduler behaviors shown
+
+- **Sorting** — toggling "Sort by" between `time` (`sort_tasks_by_time`) and `urgency` (`sort_tasks`) visibly reorders the task table.
+- **Conflict warnings** — overlapping scheduled times surface as `st.warning` messages (or `st.success` when the schedule is clear), both in the raw task list and in the final generated plan.
+- **Daily recurrence** — completing a `daily`/`weekly` task spawns its next occurrence, due one interval later, instead of disappearing for good.
+- **Fair vs. optimal planning** — the same set of tasks produces a different schedule depending on whether "Optimize total priority value" is checked.
+
+### Sample CLI output (`python main.py`)
+
+```
+Sorted by time:
+- 07:00  Feeding (Mochi)
+- 07:00  Medication (Mochi)
+- 08:00  Morning walk (Mochi)
+- 08:00  Vet checkup (Whiskers)
+- 18:00  Evening walk (Mochi)
+- --:--  Playtime (Whiskers)
+
+Incomplete tasks only:
+- Evening walk (Mochi)
+- Feeding (Mochi)
+- Morning walk (Mochi)
+- Medication (Mochi)
+- Playtime (Whiskers)
+- Vet checkup (Whiskers)
+- Litter box cleaning (Whiskers)
+
+Tasks for Mochi by name:
+- Evening walk
+- Feeding
+- Morning walk
+- Medication
+
+Conflicts:
+- Warning: 'Feeding' (Mochi at 07:00) conflicts with 'Medication' (Mochi at 07:00)
+- Warning: 'Morning walk' (Mochi at 08:00) conflicts with 'Vet checkup' (Whiskers at 08:00)
+
+Today's Schedule for Jordan (60 min available)
+--------------------------------------------------
+- Medication for Mochi at 07:00 (5 min, priority: high) [conflict: overlaps another scheduled task]
+- Vet checkup for Whiskers at 08:00 (30 min, priority: high)
+- Feeding for Mochi at 07:00 (10 min, priority: high) [conflict: overlaps another scheduled task]
+--------------------------------------------------
+Total planned time: 45 min
+```
 
 **Screenshot or video** *(optional)*: <!-- Insert a screenshot or link to a demo video here -->

@@ -1,0 +1,75 @@
+classDiagram
+    class Task {
+        +string description
+        +int duration_minutes
+        +string frequency
+        +string priority
+        +bool is_complete
+        +Pet pet
+        +string scheduled_time
+        +bool splittable
+        +int min_duration_minutes
+        +date created_at
+        +date last_completed
+        +date due_date
+        +mark_complete(today) Task
+        +mark_incomplete() void
+        +spawn_next_occurrence(today) Task
+        +days_waiting(today) int
+        +time_range(today) Tuple
+        +overlaps(other) bool
+    }
+
+    class Pet {
+        +string name
+        +string type
+        +int age
+        +string breed
+        +string needs
+        +string vet
+        +string insurance
+        +Task[] tasks
+        +add_task(task) void
+        +remove_task(task) void
+        +get_tasks(include_complete) Task[]
+    }
+
+    class Owner {
+        +string name
+        +Pet[] pets
+        +string[] availability
+        +string[] preferences
+        +int num_pets
+        +add_pet(pet) void
+        +remove_pet(pet) void
+        +add_availability(slot) void
+        +change_availability(old_slot, new_slot) void
+        +add_preference(preference) void
+        +get_all_tasks(include_complete) Task[]
+    }
+
+    class Scheduler {
+        +Owner owner
+        +get_pending_tasks(pet, today) Task[]
+        +filter_tasks(pet, status) Task[]
+        +priority_score(task, today) float
+        +sort_tasks(tasks) Task[]
+        +sort_tasks_by_time(tasks) Task[]
+        +find_conflicts(tasks) Tuple[]
+        +get_conflict_warnings(tasks) string[]
+        +build_daily_plan(available_minutes) Task[]
+        +build_optimal_plan(available_minutes) Task[]
+        +mark_task_complete(task) Task
+        +explain_plan(plan) string[]
+    }
+
+    Owner "1" *-- "many" Pet : owns
+    Pet "1" *-- "many" Task : has
+    Task "many" --> "1" Pet : belongs to
+    Scheduler "1" --> "1" Owner : schedules for
+    Scheduler ..> Pet : reads tasks from
+    Scheduler ..> Task : sorts, scores, checks conflicts, builds plans
+    Task ..> Task : spawns next occurrence (recurring)
+
+    note for Scheduler "Replaces the original 'Schedule' class.<br/>Holds no data of its own; it is a stateless<br/>service over an Owner's pets/tasks<br/>(get_pending_tasks, sort_tasks_by_time,<br/>find_conflicts / get_conflict_warnings,<br/>build_daily_plan, build_optimal_plan)."
+    note for Task "scheduled_time + duration_minutes define<br/>a time_range() used by overlaps() for<br/>conflict detection. splittable tasks can be<br/>partially scheduled down to min_duration_minutes."

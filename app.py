@@ -91,10 +91,20 @@ if st.button("Add task"):
         )
     )
 
-status_filter = st.radio("Show", ["all", "incomplete", "complete"], horizontal=True)
+col_filter, col_sort = st.columns(2)
+with col_filter:
+    status_filter = st.radio("Show", ["all", "incomplete", "complete"], horizontal=True)
+with col_sort:
+    sort_mode = st.radio("Sort by", ["time", "urgency"], horizontal=True)
+
 tasks_to_show = scheduler.filter_tasks(pet=pet, status=status_filter)
 
 if tasks_to_show:
+    sorted_tasks = (
+        scheduler.sort_tasks_by_time(tasks_to_show)
+        if sort_mode == "time"
+        else scheduler.sort_tasks(tasks_to_show)
+    )
     st.write("Current tasks:")
     st.table(
         [
@@ -102,19 +112,21 @@ if tasks_to_show:
                 "title": task.description,
                 "duration_minutes": task.duration_minutes,
                 "priority": task.priority,
+                "urgency_score": scheduler.priority_score(task),
                 "recurs": task.frequency,
                 "time": task.scheduled_time or "-",
                 "complete": task.is_complete,
             }
-            for task in scheduler.sort_tasks_by_time(tasks_to_show)
+            for task in sorted_tasks
         ]
     )
-    conflicts = scheduler.find_conflicts(pet.tasks)
-    for task_a, task_b in conflicts:
-        st.warning(
-            f"Time conflict: '{task_a.description}' ({task_a.scheduled_time}) overlaps "
-            f"'{task_b.description}' ({task_b.scheduled_time})"
-        )
+
+    conflict_warnings = scheduler.get_conflict_warnings(pet.tasks)
+    if conflict_warnings:
+        for warning in conflict_warnings:
+            st.warning(warning)
+    else:
+        st.success("No time conflicts ✅")
 else:
     st.info("No tasks yet. Add one above.")
 
@@ -137,10 +149,28 @@ if st.button("Generate schedule"):
     )
 
     if plan:
-        st.write("### Today's Schedule")
-        for line in scheduler.explain_plan(plan):
-            st.write(f"- {line}")
         total_planned = sum(task.duration_minutes for task in plan)
-        st.caption(f"Total planned time: {total_planned} min")
+        st.success(f"Schedule built: {len(plan)} task(s), {total_planned} min planned.")
+
+        st.table(
+            [
+                {
+                    "pet": task.pet.name if task.pet else "-",
+                    "title": task.description,
+                    "time": task.scheduled_time or "-",
+                    "duration_minutes": task.duration_minutes,
+                    "priority": task.priority,
+                }
+                for task in plan
+            ]
+        )
+
+        with st.expander("Why this plan?"):
+            for line in scheduler.explain_plan(plan):
+                st.write(f"- {line}")
+
+        plan_conflicts = scheduler.get_conflict_warnings(plan)
+        for warning in plan_conflicts:
+            st.warning(warning)
     else:
         st.warning("No tasks fit in the available time. Add tasks or increase available minutes.")

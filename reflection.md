@@ -90,11 +90,18 @@ For some of my methods AI wanted to really overcomplicate things. I did not thin
 - What behaviors did you test?
 - Why were these tests important?
 
+Some tested features: 
+Sorting: chronological order via sort_tasks_by_time, and untimed tasks landing last.
+Recurrence: marking a daily task complete spawns tomorrow's occurrence (via mark_complete/spawn_next_occurrence); a "once" task doesn't spawn anything.
+Conflict detection: two tasks at the identical time are flagged by find_conflicts; back-to-back tasks (end == next start) are correctly not flagged, since that boundary is easy to get wrong.
+
+Tests are important to ensure everything works properly and flows with each other as well as accounting for unusual scenarios.
+
 **b. Confidence**
 
 - How confident are you that your scheduler works correctly?
 - What edge cases would you test next if you had more time?
-
+4/5 all the tests worked but I had a bit of difficulty understanding some implementation. 
 ---
 
 ## 5. Reflection
@@ -103,10 +110,16 @@ For some of my methods AI wanted to really overcomplicate things. I did not thin
 
 - What part of this project are you most satisfied with?
 
+I think it was very interesting to see how AI can assist in such as complicated app making proccess in various different ways from planning to implementing. 
+
 **b. What you would improve**
 
 - If you had another iteration, what would you improve or redesign?
 
+If I could do another iteration I would try to be a little more cautious of my choices and really evaluate what features are really neccesarity and what overcomplicates the app development. 
+
 **c. Key takeaway**
 
 - What is one important thing you learned about designing systems or working with AI on this project?
+
+One important thing I learned was to always double check AI's work. Sometimes it oevrcomplicates or suggests unnecesary edits, which shouldn't be accepted if not needed. Its also also important to really understand the changes AI is suggesting and also ask it to explain them. 
