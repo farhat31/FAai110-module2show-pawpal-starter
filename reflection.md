@@ -40,6 +40,13 @@
 - Did your design change during implementation?
 - If yes, describe at least one change and why you made it.
 
+I asked AI for suggestions and missing pieces. It gave me the following suggestions: 
+
+Owner ↔ Schedule isn't actually wired up. The UML says Owner "maintains" a Schedule, but Owner has no schedule attribute — there's no way to get from an owner to their schedule in code.
+Task ↔ Owner is a dangling method. Task.assign_task(owner) exists but there's no field to store the result — nothing persists which owner a task is assigned to.
+Pet has no back-reference to its tasks. Task points to Pet, but Pet doesn't hold a list of tasks, and nothing holds a master task registry outside Schedule.tasks. To find "all tasks for this pet" you'd have to scan externally.
+
+I implemented those changes to my classes. 
 ---
 
 ## 2. Scheduling Logic and Tradeoffs
