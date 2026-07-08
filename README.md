@@ -88,6 +88,12 @@ Sample test output:
 | Conflict handling | | e.g., overlapping time slots |
 | Recurring tasks | | e.g., daily vs. weekly |
 
+| Task sorting | Scheduler.sort_tasks(), Scheduler.sort_tasks_by_time() | e.g., by priority, duration |
+| Filtering | Scheduler.filter_tasks(pet, status), Scheduler.get_pending_tasks(pet, today) | e.g., skip tasks if time runs out |
+| Conflict handling | Task.overlaps(), Task.time_range(), Scheduler.find_conflicts(), Scheduler.get_conflict_warnings() | e.g., overlapping time slots |
+| Recurring tasks | Task.mark_complete(), Task.spawn_next_occurrence(), Task.frequency/due_date | e.g., daily vs. weekly |
+| Fair daily planning | Scheduler.build_daily_plan()| Round-robins across pets by urgency so one pet's high-priority tasks can't crowd out another's|
+| Optimal daily planning | Scheduler.build_optimal_plan() | maximizes total priority-weighted value packed into the available minutes| 
 ## 📸 Demo Walkthrough
 
 Describe your app in numbered steps so a reader can follow along without watching a video:

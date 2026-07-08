@@ -58,8 +58,10 @@ pet = st.session_state.pet
 pet.name = pet_name
 pet.type = species
 
+scheduler = Scheduler(owner)
+
 st.markdown("### Tasks")
-st.caption("Add a few tasks. In your final version, these should feed into your scheduler.")
+st.caption("Add a few tasks and they'll feed into the scheduler below.")
 
 col1, col2, col3 = st.columns(3)
 with col1:
@@ -69,10 +71,30 @@ with col2:
 with col3:
     priority = st.selectbox("Priority", ["low", "medium", "high"], index=2)
 
-if st.button("Add task"):
-    pet.add_task(Task(description=task_title, duration_minutes=int(duration), priority=priority))
+col4, col5 = st.columns(2)
+with col4:
+    frequency = st.selectbox("Recurs", ["once", "daily", "weekly"], index=1)
+with col5:
+    set_time = st.checkbox("Set a specific time")
+    scheduled_time = None
+    if set_time:
+        scheduled_time = st.time_input("Scheduled time").strftime("%H:%M")
 
-if pet.tasks:
+if st.button("Add task"):
+    pet.add_task(
+        Task(
+            description=task_title,
+            duration_minutes=int(duration),
+            priority=priority,
+            frequency=frequency,
+            scheduled_time=scheduled_time,
+        )
+    )
+
+status_filter = st.radio("Show", ["all", "incomplete", "complete"], horizontal=True)
+tasks_to_show = scheduler.filter_tasks(pet=pet, status=status_filter)
+
+if tasks_to_show:
     st.write("Current tasks:")
     st.table(
         [
@@ -80,26 +102,39 @@ if pet.tasks:
                 "title": task.description,
                 "duration_minutes": task.duration_minutes,
                 "priority": task.priority,
+                "recurs": task.frequency,
+                "time": task.scheduled_time or "-",
                 "complete": task.is_complete,
             }
-            for task in pet.tasks
+            for task in scheduler.sort_tasks_by_time(tasks_to_show)
         ]
     )
+    conflicts = scheduler.find_conflicts(pet.tasks)
+    for task_a, task_b in conflicts:
+        st.warning(
+            f"Time conflict: '{task_a.description}' ({task_a.scheduled_time}) overlaps "
+            f"'{task_b.description}' ({task_b.scheduled_time})"
+        )
 else:
     st.info("No tasks yet. Add one above.")
 
 st.divider()
 
 st.subheader("Build Schedule")
-st.caption("This button should call your scheduling logic once you implement it.")
 
 available_minutes = st.number_input(
     "Available minutes today", min_value=0, max_value=600, value=120
 )
+optimize_value = st.checkbox(
+    "Optimize total priority value instead of splitting time fairly across pets"
+)
 
 if st.button("Generate schedule"):
-    scheduler = Scheduler(owner)
-    plan = scheduler.build_daily_plan(int(available_minutes))
+    plan = (
+        scheduler.build_optimal_plan(int(available_minutes))
+        if optimize_value
+        else scheduler.build_daily_plan(int(available_minutes))
+    )
 
     if plan:
         st.write("### Today's Schedule")
@@ -108,15 +143,4 @@ if st.button("Generate schedule"):
         total_planned = sum(task.duration_minutes for task in plan)
         st.caption(f"Total planned time: {total_planned} min")
     else:
-        st.warning(
-            "Not implemented yet. Next step: create your scheduling logic (classes/functions) and call it here."
-        )
-        st.markdown(
-            """
-Suggested approach:
-1. Design your UML (draft).
-2. Create class stubs (no logic).
-3. Implement scheduling behavior.
-4. Connect your scheduler here and display results.
-"""
-        )
+        st.warning("No tasks fit in the available time. Add tasks or increase available minutes.")

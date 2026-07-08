@@ -56,11 +56,14 @@ I implemented those changes to my classes.
 - What constraints does your scheduler consider (for example: time, priority, preferences)?
 - How did you decide which constraints mattered most?
 
+My scheduler considers time, priority, preferences, due date, aging and more. The constraints that mattered the most were the ones which were essential to the flow of the app and made the app more feasible. 
+
 **b. Tradeoffs**
 
 - Describe one tradeoff your scheduler makes.
 - Why is that tradeoff reasonable for this scenario?
 
+One tradeoff the scheduker makes is that it round-robins tasks per pet rather than focusing on the next-best task. This isn't the best for optimal time allocation and does to add the most value possible. 
 ---
 
 ## 3. AI Collaboration
